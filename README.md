@@ -3,7 +3,7 @@ Working profile for telegram-desktop package in archlinux
 
 # installation
 
-1. just bin.telegram to /etc/apparmor.d/ folder
+1. just bin.telegram-desktop to /etc/apparmor.d/ folder
 2. edit download directory
 3. Start complain mode
 ```
