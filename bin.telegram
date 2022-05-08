@@ -1,0 +1,80 @@
+#  AppArmor profile for telegram-desktop
+# ---------------------------------------------
+# Author: Artem Nazarov <artem@nazarow.ru>
+# Last change: May 08, 2022
+
+
+# Requirements:
+#    apparmor.d/tunables/confidential
+#    apparmor.d/tunables/media-extensions
+#    apparmor.d/abstractions/confidential-deny
+#    apparmor.d/abstractions/block-networking
+
+include <tunables/global>
+include <tunables/confidential>
+include <tunables/media-extensions>
+
+# Directories where videos and data are stored
+@{DATA_DIR} = /{data,home,media,mnt,srv,net,cdrom}
+
+profile telegram-desktop /bin/telegram-desktop {
+	include <abstractions/base>
+	include <abstractions/fonts>
+	include <abstractions/dbus-session-strict>
+	include <abstractions/audio>
+	include <abstractions/X>
+	include <abstractions/wayland>
+	include <abstractions/freedesktop.org>
+
+	# Block network connection:
+	include <abstractions/block-networking>
+	# Allow network connection (uncomment this line):
+	# include <abstractions/nameservice>
+
+	# Block full access to sensitive data, as passwords and keys.
+	# Includes /boot/**, /var/log/** & /etc/apparmor.d/** directories. View in: tunables/confidential.
+	include <abstractions/confidential-deny>
+
+	# Only reading access in Home directory, mounted drives and others directories
+	@{DATA_DIR}/** r,
+
+	# Supported files
+	/**?.@{MEDIA_EXT} r,
+
+	# Configuration
+	owner @{HOME}/.config/ rw,
+ 
+	/etc/nsswitch.conf r,
+	deny /etc/passwd r,
+	/etc/udev/udev.conf r,
+	/etc/vdpau_wrapper.cfg r,
+	/etc/glvnd/{,**} r,
+	/usr/share/{glvnd,drirc.d}/{,**} r,
+
+	/sys/**/ r,
+	/sys/devices/**/uevent r,
+	/sys/devices/system/**/meminfo r,
+	/sys/devices/pci[0-9]*/**/{config,revision} r,
+	/sys/devices/pci[0-9]*/**/{,subsystem_}{device,vendor} r,
+
+	# Device access
+	/dev/ati/{,**} r,
+	/dev/dri/{,**} r,
+	/dev/tty rw,
+	audit deny /dev/{video,audio}* rwlkmx,
+
+	# Binaries and libraries
+	/bin/telegram-desktop ixr,
+	/usr/bin/{dbus-send,xdg-screensaver,xset} Pixr,
+	/bin/{grep,hostname,mv,sed,which} Pixr,
+ 
+
+	 owner @{HOME}/.TelegramDesktop/ rw,
+   owner @{HOME}/.TelegramDesktop/** krw,
+
+  	# Downloads/uploads directory
+  	@{HOME}/Загрузки krw,
+}
+
+# kate: syntax AppArmor Security Profile; replace-tabs off; remove-trailing-spaces mod;
+# vim:  syntax=apparmor
