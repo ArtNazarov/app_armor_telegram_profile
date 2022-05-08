@@ -7,9 +7,9 @@ Working profile for telegram-desktop package in archlinux
 2. edit download directory
 3. Start complain mode
 ```
-aa-compain /etc/apparmor.d/bin.telegram
+aa-compain /etc/apparmor.d/bin.telegram-desktop
 ```
 3. Set profile to enforce mode
 ```
-aa-enforce bin.telegram
+aa-enforce /etc/apparmor.d/bin.telegram-desktop
 ```
